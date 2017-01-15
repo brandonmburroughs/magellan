@@ -37,17 +37,17 @@ parser.add_argument('-p', '--period', action='store', type=str, default='week',
                     help='Desired analysis period.')
 parser.add_argument('-w', '--week', action='store', type=int,
                     default=None, help='Week to analyze (default, uses most \
-                    recent week)')
+recent week)')
 parser.add_argument('-m', '--month', action='store', type=int,
                     default=None, help='Month to analyze')
 parser.add_argument('-y', '--year', action='store', type=int,
                     default=None, help='Year. If not given, the current year \
-                    is used.')
+is used.')
 parser.add_argument('--maxtime', action='store', type=float, default=840.,
                     help="Maximum time separation (in hours) between adjacent \
-                         location points. Points separated by a larger value \
-                         will not be considered as connected (for the \
-                         purpose of determining if a point counts as travel).")
+location points. Points separated by a larger value \
+will not be considered as connected (for the \
+purpose of determining if a point counts as travel).")
 args = parser.parse_args()
 
 trinidad = magellan.magellan()
@@ -90,7 +90,7 @@ if args.period == 'week' and week < 0:
 # get home location from the 'homeloc' database
 # there should be a better way to select this...
 if args.period == 'week':
-    print "Loading home location for week %i of %i..." % (week, year)
+    print("Loading home location for week %i of %i..." % (week, year))
     command = 'SELECT * FROM homeloc WHERE \
               (YEAR(STARTDATE) < %i AND YEAR(ENDDATE) > %i) OR \
               (YEAR(STARTDATE) < %i AND YEAR(ENDDATE) = %i AND WEEK(ENDDATE,1) >= %i) OR \
@@ -101,7 +101,7 @@ if args.period == 'week':
                  year, week, year,
                  year, week, year, week)
 elif args.period == 'month':
-    print "Loading home location for month %i of %i..." % (month, year)
+    print("Loading home location for month %i of %i..." % (month, year))
     command = 'SELECT * FROM homeloc WHERE \
              (YEAR(STARTDATE) <= %i AND MONTH(STARTDATE) <= %i AND \
               YEAR(ENDDATE) > %i) OR \
@@ -118,24 +118,24 @@ elif args.period == 'month':
                 year, year, month,
                 year, month, year)
 elif args.period == 'year':
-    print "Loading home location for %i..." % (year)
+    print("Loading home location for %i..." % (year))
     command = 'SELECT * FROM homeloc WHERE \
                (YEAR(STARTDATE) <= %i AND YEAR(ENDDATE) >= %i)' \
                % (year, year)
 elif args.period == 'all':
-    print "Loading all home locations..."
+    print("Loading all home locations...")
     command = 'SELECT * FROM homeloc ORDER BY STARTDATE'
 cursor.execute(command)
 recs = cursor.fetchall()
 
 mhlocs = 0
 if len(recs) > 1:
-    print "More than one home location for the specified time."
+    print("More than one home location for the specified time.")
     mhlocs = 1
     hlocs = recs
 elif len(recs) == 0:
-    print "WARNING: no home location records found for the specified time. \
-           Assuming all records are 'away' or 'traveling'."
+    print("WARNING: no home location records found for the specified time. \
+Assuming all records are 'away' or 'traveling'.")
     hlat = -1
     hlong = -1
     hradius = -1
@@ -174,7 +174,7 @@ cursor.execute(command)
 recs = cursor.fetchall()
 if len(recs) < 1:
     sys.stderr.write('ERROR: no records found for the requested time \
-                     interval. Exiting.\n')
+interval. Exiting.\n')
     sys.exit()
 
 if args.period != 'all':
@@ -190,7 +190,7 @@ else:
 nrecs = len(recs)
 loctype = 'away'
 d = 0
-print "Processing GPS records.."
+print("Processing GPS records..")
 for rec1 in recs:
     if mhlocs:
         # figure out which homeloc is appropriate for this datestamp
@@ -285,11 +285,11 @@ for rec1 in recs:
 # an entry, ask before overwriting)
 totaltime = atime+htime+ttime
 
-print "%s recorded a total time of approximately %f hours from %i records." % \
-      (args.period, totaltime/60., nrecs)
-print "Replaced %i duplicate entries." % (d)
+print("%s recorded a total time of approximately %f hours from %i records." % \
+      (args.period, totaltime/60., nrecs))
+print("Replaced %i duplicate entries." % (d))
 if args.period == 'week' or args.period == 'month':
-    print "Submitting totals to SQL database.."
+    print("Submitting totals to SQL database..")
 print("Summary:\n")
 print("\tHours\tFraction")
 print("Home:\t{0:1.0f}\t{1:0.2f}".format(htime/60., htime/totaltime))
